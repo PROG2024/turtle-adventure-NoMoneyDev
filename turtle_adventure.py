@@ -706,7 +706,6 @@ class TurtleAdventureGame(Game): # pylint: disable=too-many-ancestors
             self.clear_turtle()
             self.reset_game()
             self.level += 1
-            print(self.level)
             self.canvas.delete("all")
             self.init_game()
             self.start()
