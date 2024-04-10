@@ -347,7 +347,7 @@ class RandomWalkEnemy(Enemy):
 
     def __init__(self,
                  game: "TurtleAdventureGame",
-                 size: int,
+                 size: int = 50,
                  color: str = 'blue'):
         super().__init__(game, size, color)
         self.__speed = 10 + 3 * math.sin(self.game.level * 0.08)
@@ -423,7 +423,7 @@ class ChaseEnemy(Enemy):
 
     def __init__(self,
                  game: "TurtleAdventureGame",
-                 size: int,
+                 size: int = 20,
                  color: str = 'red'):
         super().__init__(game, size, color)
         self.__speed = 3.5 + 2*math.sin(self.game.level * 0.08)
@@ -463,7 +463,7 @@ class FencingEnemy(Enemy):
 
     def __init__(self,
                  game: "TurtleAdventureGame",
-                 size: int,
+                 size: int = 20,
                  color: str = 'grey'):
         super().__init__(game, size, color)
         self.__speed = 7 + 3 * math.sin(self.game.level * 0.08)
@@ -510,7 +510,7 @@ class SentryGun(Enemy):
 
     def __init__(self,
                  game: "TurtleAdventureGame",
-                 size: int,
+                 size: int = 20,
                  color: str = 'blue'):
         super().__init__(game, size, color)
         self.__speed = 12 + 5 * math.sin(self.game.level * 0.08)
@@ -650,7 +650,7 @@ class EnemyGenerator:
         """
         Create a new enemy, possibly based on the game level
         """
-        new_enemy = EnemyGenerator.ENEMY_TYPE[i](self.game, size=20)
+        new_enemy = EnemyGenerator.ENEMY_TYPE[i](self.game)
         self.__game.add_enemy(new_enemy)
 
 
