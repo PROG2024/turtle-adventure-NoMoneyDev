@@ -270,7 +270,6 @@ class Enemy(TurtleGameElement):
         self.turtle.sety(val)
 
 
-# TODO
 # * Define your enemy classes
 # * Implement all methods required by the GameElement abstract class
 # * Define enemy's update logic in the update() method
@@ -337,6 +336,7 @@ class DemoEnemy(Enemy):
         rand_y = random.randint(height//10, height*9//10)
         return self.turtle.towards(rand_x, rand_y)
 
+
 class RandomWalkEnemy(Enemy):
     """
     RandomWalk enemy
@@ -367,9 +367,9 @@ class RandomWalkEnemy(Enemy):
         if self.distance_to_rand_point < self.__speed:
             self.new_rand_point()
             self.turtle.setheading(self.turtle.towards(self.rand_point))
-            self.turtle.clear()
-            self.draw_path()
         self.turtle.forward(self.__speed)
+        self.turtle.clear()
+        self.draw_path()
         if self.hits_player():
             self.game.game_over_lose()
 
@@ -415,7 +415,7 @@ class RandomWalkEnemy(Enemy):
 
 class ChaseEnemy(Enemy):
     """
-    Demo enemy
+    Chase enemy
     """
 
     def __init__(self,
@@ -461,7 +461,7 @@ class FencingEnemy(Enemy):
     def __init__(self,
                  game: "TurtleAdventureGame",
                  size: int,
-                 color: str = 'blue'):
+                 color: str = 'grey'):
         super().__init__(game, size, color)
         self.__speed = 7 + 3 * math.sin(self.game.level * 0.08)
         self.radius = 50
@@ -493,7 +493,7 @@ class FencingEnemy(Enemy):
         self.__turtle.getscreen().update()
 
     def delete(self) -> None:
-        pass
+        del self.turtle
 
     @property
     def turtle(self):
@@ -606,7 +606,7 @@ class Bullet(Enemy):
     def turtle(self):
         return self.__turtle
 
-# TODO
+
 # Complete the EnemyGenerator class by inserting code to generate enemies
 # based on the given game level; call TurtleAdventureGame's add_enemy() method
 # to add enemies to the game at certain points in time.
@@ -619,8 +619,8 @@ class EnemyGenerator:
     An EnemyGenerator instance is responsible for creating enemies of various
     kinds and scheduling them to appear at certain points in time.
     """
-    NUM_ENEMY_PER_LEVEL = [2,2,3,4,4,5,5,5,6,6] # R,R,C,F,C,CT
-    ENEMY_TYPE = [FencingEnemy, SentryGun]
+    NUM_ENEMY_PER_LEVEL = [2,2,3,4,4,5,5,5,6,6] # R,R,C,F,C,SG
+    ENEMY_TYPE = [RandomWalkEnemy, RandomWalkEnemy, ChaseEnemy, FencingEnemy, ChaseEnemy, SentryGun]
 
     def __init__(self, game: "TurtleAdventureGame", level: int):
         self.__game: TurtleAdventureGame = game
@@ -666,6 +666,7 @@ class TurtleAdventureGame(Game): # pylint: disable=too-many-ancestors
         self.home: Home
         self.enemies: list[Enemy] = []
         self.enemy_generator: EnemyGenerator
+        self.parent = parent
         super().__init__(parent)
 
     def init_game(self):
@@ -706,6 +707,7 @@ class TurtleAdventureGame(Game): # pylint: disable=too-many-ancestors
                                 font=font,
                                 fill="green")
 
+
     def game_over_lose(self) -> None:
         """
         Called when the player loses the game and stop the game
@@ -717,3 +719,4 @@ class TurtleAdventureGame(Game): # pylint: disable=too-many-ancestors
                                 text="You Lose",
                                 font=font,
                                 fill="red")
+

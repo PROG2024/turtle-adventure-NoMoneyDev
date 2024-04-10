@@ -163,3 +163,9 @@ class Game(tk.Frame, ABC): # pylint: disable=too-many-ancestors
             element.render()
         if self.__started:
             self.after(self.__update_delay, self.animate)
+
+    def reset_game(self):
+        for ele in self.__game_elements:
+            ele.delete()
+        del self.__game_elements
+        self.__game_elements = []
