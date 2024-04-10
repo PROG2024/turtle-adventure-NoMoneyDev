@@ -510,8 +510,10 @@ class SentryGun(Enemy):
                  size: int,
                  color: str = 'blue'):
         super().__init__(game, size, color)
-        self.__speed = 7 + 3 * math.sin(self.game.level * 0.08)
-        self.__interval =
+        self.__speed = 12 + 5 * math.sin(self.game.level * 0.08)
+        self.__last_bullet = time.monotonic()
+        self.__interval = 1.5
+        self.__bullets = []
 
     def create(self) -> None:
         turtle = RawTurtle(self.canvas)
@@ -521,23 +523,81 @@ class SentryGun(Enemy):
         turtle.penup()
         self.__turtle = turtle
         self.set_spawn_point()
-        self.turtle.setheading(0)
+        self.turtle.setheading(270)
 
     def set_spawn_point(self):
         self.x = self.game.screen_width/2
         self.y = self.game.screen_height/2
 
     def update(self) -> None:
-        if (abs(self.game.home.x - self.x) > self.radius or
-                abs(self.game.home.y - self.y) > self.radius):
-            self.turtle.back(self.__speed)
-            self.turtle.left(90)
+        self.turn_to_player()
+        if time.monotonic() - self.__last_bullet > self.__interval:
+            self.fire()
+            self.__last_bullet = time.monotonic()
+        for bullet in self.__bullets:
+            bullet.update()
+            if bullet.out_screen():
+                self.__bullets.remove(bullet)
+                del bullet
+        print(len(self.__bullets))
+    def turn_to_player(self):
+        self.turtle.setheading(self.__turtle.towards(self.game.player.x, self.game.player.y))
+
+    def fire(self):
+        bullet = Bullet(self.game, self.x, self.y, self.turtle.heading())
+        self.__bullets += [bullet]
+
+    def render(self) -> None:
+        self.__turtle.getscreen().update()
+        for bullet in self.__bullets:
+            bullet.render()
+
+    def delete(self) -> None:
+        pass
+
+    @property
+    def turtle(self):
+        return self.__turtle
+
+
+class Bullet(Enemy):
+    def __init__(self,
+                 game: "TurtleAdventureGame",
+                 x: float,
+                 y:float,
+                 heading: float,
+                 size: int = 15,
+                 color: str = 'black'):
+        super().__init__(game, size, color)
+        self.__speed = 10 + 3 * math.sin(self.game.level * 0.08)
+        self.__heading = heading
+        self.create()
+        self.set_spawn_point(x,y)
+
+    def create(self) -> None:
+        turtle = RawTurtle(self.canvas)
+        turtle.getscreen().tracer(False)  # disable turtle's built-in animation
+        turtle.shape("turtle")
+        turtle.color(self.color)
+        turtle.penup()
+        self.__turtle = turtle
+        self.turtle.setheading(self.__heading)
+
+    def update(self) -> None:
         self.turtle.forward(self.__speed)
         if self.hits_player():
             self.game.game_over_lose()
 
     def render(self) -> None:
         self.__turtle.getscreen().update()
+
+    def set_spawn_point(self,x,y):
+        self.x = x
+        self.y = y
+
+    def out_screen(self):
+        return not (-10 < self.x < self.game.screen_width+10 and
+                    -10 < self.y < self.game.screen_height+10)
 
     def delete(self) -> None:
         pass
@@ -560,7 +620,7 @@ class EnemyGenerator:
     kinds and scheduling them to appear at certain points in time.
     """
     NUM_ENEMY_PER_LEVEL = [2,2,3,4,4,5,5,5,6,6] # R,R,C,F,C,CT
-    ENEMY_TYPE = [FencingEnemy, ChaseEnemy]
+    ENEMY_TYPE = [FencingEnemy, SentryGun]
 
     def __init__(self, game: "TurtleAdventureGame", level: int):
         self.__game: TurtleAdventureGame = game
