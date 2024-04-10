@@ -4,9 +4,12 @@ adventure game.
 """
 import random
 import time
+import turtle
 from turtle import RawTurtle
 from gamelib import Game, GameElement
 import math
+
+MAX_LEVEL = 10
 
 class TurtleGameElement(GameElement):
     """
@@ -391,7 +394,7 @@ class RandomWalkEnemy(Enemy):
         self.__turtle.getscreen().update()
 
     def delete(self) -> None:
-        pass
+        self.turtle.screen.clear()
 
     def new_rand_point(self):
         x_margin = 300
@@ -493,7 +496,7 @@ class FencingEnemy(Enemy):
         self.__turtle.getscreen().update()
 
     def delete(self) -> None:
-        del self.turtle
+        pass
 
     @property
     def turtle(self):
@@ -647,7 +650,7 @@ class EnemyGenerator:
         """
         Create a new enemy, possibly based on the game level
         """
-        new_enemy = EnemyGenerator.ENEMY_TYPE[i](self.game, 20)
+        new_enemy = EnemyGenerator.ENEMY_TYPE[i](self.game, size=20)
         self.__game.add_enemy(new_enemy)
 
 
@@ -666,7 +669,6 @@ class TurtleAdventureGame(Game): # pylint: disable=too-many-ancestors
         self.home: Home
         self.enemies: list[Enemy] = []
         self.enemy_generator: EnemyGenerator
-        self.parent = parent
         super().__init__(parent)
 
     def init_game(self):
@@ -700,13 +702,21 @@ class TurtleAdventureGame(Game): # pylint: disable=too-many-ancestors
         Called when the player wins the game and stop the game
         """
         self.stop()
-        font = ("Arial", 36, "bold")
-        self.canvas.create_text(self.screen_width/2,
-                                self.screen_height/2,
-                                text="You Win",
-                                font=font,
-                                fill="green")
-
+        if self.level != MAX_LEVEL-1:
+            self.clear_turtle()
+            self.reset_game()
+            self.level += 1
+            print(self.level)
+            self.canvas.delete("all")
+            self.init_game()
+            self.start()
+        else:
+            font = ("Arial", 36, "bold")
+            self.canvas.create_text(self.screen_width / 2,
+                                    self.screen_height / 2,
+                                    text="You Win",
+                                    font=font,
+                                    fill="green")
 
     def game_over_lose(self) -> None:
         """
@@ -720,3 +730,7 @@ class TurtleAdventureGame(Game): # pylint: disable=too-many-ancestors
                                 font=font,
                                 fill="red")
 
+    def clear_turtle(self):
+        for ele in self.enemies:
+            ele.turtle.clear()
+        self.enemies = []

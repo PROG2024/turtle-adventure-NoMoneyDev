@@ -3,6 +3,7 @@ The gamelib module defines abstract classes necessary for implementing simple
 games based on tkinter's canvas.
 """
 import tkinter as tk
+import turtle
 from abc import ABC, abstractmethod
 
 
@@ -165,7 +166,8 @@ class Game(tk.Frame, ABC): # pylint: disable=too-many-ancestors
             self.after(self.__update_delay, self.animate)
 
     def reset_game(self):
+        self.stop()
         for ele in self.__game_elements:
             ele.delete()
-        del self.__game_elements
+            del ele
         self.__game_elements = []
